@@ -28,6 +28,8 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:eslint",
+    "@semantic-release/changelog": "catalog:release",
+    "@semantic-release/git": "catalog:release",
     "eslint": "catalog:eslint",
     "eslint-plugin-format": "catalog:eslint",
     "lint-staged": "catalog:dev",
