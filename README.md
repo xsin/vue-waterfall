@@ -58,7 +58,7 @@ yarn add @xsin/vue-waterfall
 
 ```vue
 <script setup lang="ts">
-import { Waterfall } from '@xsin/vue-waterfall'
+import Waterfall from '@xsin/vue-waterfall'
 
 interface Item {
   id: string
@@ -175,8 +175,8 @@ function onScrollLoad() {
 
 ### 环境要求
 
-- Node.js 18+
-- pnpm 8+
+- Node.js 24+
+- pnpm 10+
 
 ### 本地开发
 

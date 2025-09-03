@@ -29,11 +29,11 @@ $ npm install @xsin/vue-waterfall
 
 ```typescript
 import { createApp } from 'vue'
-import MasonryWall from '@xsin/vue-waterfall'
+import Waterfall from '@xsin/vue-waterfall'
 
 const app = createApp()
 
-app.use(MasonryWall)
+app.use(Waterfall)
 ```
 
 Props:
@@ -94,10 +94,10 @@ In addition, the elements of items should not set a specific width and instead b
 Create a plugin (e.g., `plugins/vue-waterfall.ts`) with the following code:
 
 ```ts
-import MasonryWall from '@xsin/vue-waterfall'
+import Waterfall from '@xsin/vue-waterfall'
 
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.use(MasonryWall)
+  nuxtApp.vueApp.use(Waterfall)
 })
 ```
 
