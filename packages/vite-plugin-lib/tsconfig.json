@@ -1,0 +1,7 @@
+{
+  "extends": "@xsin/tsconfig/lib",
+  "compilerOptions": {
+    "exactOptionalPropertyTypes": false
+  },
+  "exclude": ["node_modules", "coverage", "dist"]
+}

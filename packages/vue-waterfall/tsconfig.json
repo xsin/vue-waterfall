@@ -1,0 +1,14 @@
+{
+  "extends": "@xsin/tsconfig/vite",
+  "compilerOptions": {
+    "paths": {
+      "~/*": ["./src/*"],
+      "@xsin/vite-plugin-lib": ["../../packages/vite-plugin-lib/src/index.ts"]
+    },
+    "types": ["node", "vue", "resize-observer-browser"]
+  },
+  "exclude": ["node_modules", "coverage", "dist"],
+  "vueCompilerOptions": {
+    "dataAttributes": ["data-index"]
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "name": "@xsin/vue-waterfall-repo",
+  "type": "module",
+  "version": "0.1.0",
+  "homepage": "https://github.com/xsin/vue-waterfall",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xsin/vue-waterfall.git"
+  },
+  "bugs": "https://github.com/xsin/vue-waterfall/issues",
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
+    "taze": "taze minor -wIr",
+    "build": "pnpm --filter @xsin/vue-waterfall build",
+    "build:demo": "pnpm --filter @xsin/vue-waterfall-demo build",
+    "dev": "pnpm --filter @xsin/vue-waterfall-demo dev",
+    "pkg:dev": "pnpm -r --filter=./packages/* --parallel run dev",
+    "pkg:test": "pnpm -r --filter=./packages/* --parallel run test",
+    "type-check": "pnpm --filter @xsin/vue-waterfall type-check",
+    "release": "bump -r",
+    "release:waterfall": "pnpm --filter @xsin/vue-waterfall release"
+  },
+  "peerDependencies": {
+    "vue": "catalog:frontend"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:eslint",
+    "@semantic-release/changelog": "catalog:release",
+    "@semantic-release/git": "catalog:release",
+    "@semantic-release/github": "catalog:release",
+    "@semantic-release/npm": "catalog:release",
+    "eslint": "catalog:eslint",
+    "eslint-plugin-format": "catalog:eslint",
+    "lint-staged": "catalog:dev",
+    "npm-run-all2": "catalog:dev",
+    "semantic-release": "catalog:release",
+    "simple-git-hooks": "catalog:dev",
+    "taze": "catalog:dev"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "npx lint-staged"
+  },
+  "lint-staged": {
+    "*": "eslint --fix"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}

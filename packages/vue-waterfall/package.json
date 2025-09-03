@@ -1,0 +1,69 @@
+{
+  "name": "@xsin/vue-waterfall",
+  "type": "module",
+  "version": "0.0.0-development",
+  "description": "Responsive masonry layout with SSR support and zero dependencies for Vue 3.",
+  "author": {
+    "name": "XSIN STUDIO",
+    "url": "https://github.com/xsin"
+  },
+  "license": "MIT",
+  "homepage": "https://xsin.work",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xsin/vue-waterfall.git",
+    "directory": "packages/vue-waterfall"
+  },
+  "bugs": {
+    "url": "https://github.com/xsin/vue-waterfall/issues"
+  },
+  "keywords": [
+    "vue",
+    "plugin",
+    "component",
+    "masonry",
+    "waterfall"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.mts",
+        "default": "./dist/index.mjs"
+      }
+    }
+  },
+  "types": "dist/types/index.d.mts",
+  "files": [
+    "dist/*",
+    "src/**/*.vue"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "test": "vitest run",
+    "type-check": "vue-tsc --build",
+    "release": "semantic-release"
+  },
+  "peerDependencies": {
+    "vue": "catalog:frontend"
+  },
+  "dependencies": {
+    "@xsin/vue-waterfall-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/resize-observer-browser": "catalog:types",
+    "@vitejs/plugin-vue": "catalog:build",
+    "@vue/test-utils": "catalog:test",
+    "@xsin/tsconfig": "workspace:*",
+    "@xsin/vite-plugin-lib": "workspace:*",
+    "jsdom": "catalog:test",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vue": "catalog:frontend",
+    "vue-tsc": "catalog:build"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

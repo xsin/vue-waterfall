@@ -1,0 +1,65 @@
+# @xsin/vite-plugin-lib
+
+> Vite plugin for build configuration, automatic aliases, and type declarations.
+
+
+## Features
+
+- Automatic aliases based on `tsconfig.json`
+- Automatic build configuration
+- Type declaration generation based on [vite-plugin-dts](https://github.com/qmhc/vite-plugin-dts).
+
+## Installation
+
+```bash
+yarn add -D @xsin/vite-plugin-lib
+pnpm add -D @xsin/vite-plugin-lib
+```
+
+## Usage
+
+This highly opinionated all-in one Vite plugin enables automatic alias configuration based on `tsconfig.json` paths, library export configuration, and type declaration generation.
+
+### Aliases
+
+```ts
+import { defineConfig } from 'vite'
+
+import { tsconfigPaths } from 'vite-plugin-lib'
+
+export default defineConfig({
+  plugins: [tsconfigPaths()],
+})
+```
+
+### Library
+
+The `library` plugin includes the `alias` plugin, configures build settings, and generates `.d.ts` files.
+
+```ts
+import { defineConfig } from 'vite'
+
+import { library } from 'vite-plugin-lib'
+
+export default defineConfig({
+  plugins: [
+    library({
+      entry: 'src/index.ts', // file name determines output file names, default is 'src/index.ts'
+      formats: ['es'], // optional, default is ['es']
+      name: 'YourGlobalUMDName', // optional if format does not include 'umd' or 'iife'
+      // optional, default externalizes all builtin modules, node_modules, dependencies, and peerDependencies
+      bundle: {
+        builtin: false,
+        dependencies: false,
+        devDependencies: true,
+        peerDependencies: false,
+        exclude: [], // individual packages or modules to externalize
+        include: [], // override the default externalization for individual packages or modules
+        nodeModules: false,
+      },
+      manifest: 'package.json', // relative path to package.json, default is package.json,
+      tsconfig: 'tsconfig.json', // relative path to tsconfig.json, default is tsconfig.json
+    }),
+  ],
+})
+```

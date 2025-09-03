@@ -1,0 +1,10 @@
+{
+  "extends": "@xsin/tsconfig/vite",
+  "compilerOptions": {
+    "paths": {
+      "@xsin/vite-plugin-lib": ["../../packages/vite-plugin-lib/src/index.ts"]
+    },
+    "types": ["node", "resize-observer-browser"]
+  },
+  "exclude": ["node_modules", "coverage", "dist"]
+}

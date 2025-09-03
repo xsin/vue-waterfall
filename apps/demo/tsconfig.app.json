@@ -1,0 +1,14 @@
+{
+  "extends": "@vue/tsconfig/tsconfig.dom.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@xsin/vue-waterfall": ["../../packages/vue-waterfall/src/index.ts"]
+    },
+    "types": [
+      "vite/client"
+    ]
+  },
+  "include": ["src/**/*", "src/**/*.vue"],
+  "exclude": ["src/**/__tests__/*"]
+}

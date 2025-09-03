@@ -1,0 +1,47 @@
+{
+  "name": "@xsin/vue-waterfall-demo",
+  "type": "module",
+  "version": "0.1.0",
+  "homepage": "https://github.com/xsin/vue-waterfall",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xsin/vue-waterfall.git"
+  },
+  "bugs": "https://github.com/xsin/vue-waterfall/issues",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
+  },
+  "peerDependencies": {
+    "vue": "catalog:frontend"
+  },
+  "dependencies": {
+    "@xsin/vue-waterfall": "workspace:*"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "catalog:eslint",
+    "@tailwindcss/vite": "catalog:build",
+    "@tsconfig/node24": "catalog:build",
+    "@types/mockjs": "catalog:types",
+    "@types/node": "catalog:types",
+    "@vitejs/plugin-vue": "catalog:build",
+    "@vitejs/plugin-vue-jsx": "catalog:build",
+    "@vue/tsconfig": "catalog:build",
+    "eslint": "catalog:eslint",
+    "jiti": "catalog:dev",
+    "less": "catalog:dev",
+    "mockjs": "catalog:dev",
+    "npm-run-all2": "catalog:dev",
+    "tailwindcss": "catalog:dev",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plugin-dts": "catalog:build",
+    "vite-plugin-vue-devtools": "catalog:build",
+    "vue-tsc": "catalog:build"
+  }
+}
