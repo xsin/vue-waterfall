@@ -43,7 +43,7 @@
     "dev": "vite build --watch",
     "test": "vitest run",
     "type-check": "vue-tsc --build",
-    "release": "semantic-release",
+    "release": "npx semantic-release",
     "lint": "eslint",
     "lint:fix": "eslint --fix"
   },
@@ -66,6 +66,7 @@
     "vue-tsc": "catalog:build"
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

@@ -61,7 +61,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: latest
-          registry-url: https://registry.npmjs.org/
           cache: pnpm
 
       - name: Install dependencies
@@ -74,8 +73,17 @@ jobs:
         id: semantic
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm release
+
+      - name: Publish packages to npm
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          echo "Publishing new release version: ${{ steps.semantic.outputs.new_release_version }}"
+          pnpm --filter @xsin/vue-waterfall publish --no-git-checks --access public
+          pnpm --filter @xsin/vue-waterfall-core publish --no-git-checks --access public
+          pnpm --filter @xsin/vite-plugin-lib publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   pkg-pr-new:
     runs-on: ubuntu-latest
