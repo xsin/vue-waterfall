@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Waterfall from '@xsin/vue-waterfall'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { generateMockList } from './mock'
 
 // 定义数据类型
@@ -19,15 +19,43 @@ interface MockItem {
 const dataSource = ref<MockItem[]>(generateMockList(0, 10))
 const loadCount = ref(1)
 const maxLoads = 5
+const isLoading = ref(false)
+const hasMore = ref(true)
 
 const canLoadMore = computed(() => loadCount.value < maxLoads)
 const remainingLoads = computed(() => maxLoads - loadCount.value)
 
-function loadDataSource() {
-  if (canLoadMore.value) {
+// 瀑布流组件引用
+const waterfallRef = ref()
+
+async function loadDataSource() {
+  if (!canLoadMore.value || isLoading.value) {
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    // 模拟异步加载
+    await new Promise(resolve => setTimeout(resolve, 1000))
+
     const currentIndex = dataSource.value.length
     dataSource.value = [...dataSource.value, ...generateMockList(currentIndex, 10)]
     loadCount.value++
+
+    // 更新瀑布流组件的状态
+    if (waterfallRef.value) {
+      waterfallRef.value.setHasMore(canLoadMore.value)
+    }
+  }
+  catch (error) {
+    console.error('加载数据失败:', error)
+    if (waterfallRef.value) {
+      waterfallRef.value.setError('加载失败，请重试')
+    }
+  }
+  finally {
+    isLoading.value = false
   }
 }
 
@@ -36,6 +64,10 @@ function addManualData() {
     const currentIndex = dataSource.value.length
     dataSource.value = [...dataSource.value, ...generateMockList(currentIndex, 10)]
     loadCount.value++
+
+    if (waterfallRef.value) {
+      waterfallRef.value.setHasMore(canLoadMore.value)
+    }
   }
 }
 
@@ -46,25 +78,33 @@ function onItemClick() {
 function resetData() {
   dataSource.value = generateMockList(0, 10)
   loadCount.value = 1
-}
+  hasMore.value = true
 
-// 监听滚动到底部，自动加载更多
-function handleScroll() {
-  const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-  const windowHeight = window.innerHeight
-  const documentHeight = document.documentElement.scrollHeight
-
-  if (scrollTop + windowHeight >= documentHeight - 100) {
-    loadDataSource()
+  if (waterfallRef.value) {
+    waterfallRef.value.setHasMore(true)
+    waterfallRef.value.setError(undefined)
   }
 }
 
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
+// 滚动加载事件处理
+function onScrollLoad() {
+  console.warn('onScrollLoad')
+  loadDataSource()
+}
 
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', handleScroll)
+function onScrollLoadStart() {
+  // 开始滚动加载
+}
+
+function onScrollLoadEnd() {
+  // 结束滚动加载
+}
+
+onMounted(() => {
+  // 初始化瀑布流组件状态
+  if (waterfallRef.value) {
+    waterfallRef.value.setHasMore(canLoadMore.value)
+  }
 })
 </script>
 
@@ -238,6 +278,7 @@ onBeforeUnmount(() => {
 
         <!-- 使用最新的 Waterfall 组件 API -->
         <Waterfall
+          ref="waterfallRef"
           :items="dataSource"
           :column-width="400"
           :gap="16"
@@ -246,6 +287,9 @@ onBeforeUnmount(() => {
           :key-mapper="(item: MockItem) => item.id"
           @redraw="() => console.log('Waterfall redrawn')"
           @redraw-skip="() => console.log('Waterfall redraw skipped')"
+          @scroll-load="onScrollLoad"
+          @scroll-load-start="onScrollLoadStart"
+          @scroll-load-end="onScrollLoadEnd"
         >
           <template #default="{ item, column, columnCount, row, index }">
             <div
@@ -307,6 +351,26 @@ onBeforeUnmount(() => {
               </div>
             </div>
           </template>
+
+          <!-- 自定义滚动加载提示插槽 -->
+          <template #scroll-loader="{ isLoading: loaderIsLoading, hasMore: loaderHasMore, error }">
+            <div v-if="loaderIsLoading" class="custom-scroll-loader loading">
+              <div class="custom-spinner" />
+              <span class="loading-text">正在加载更多内容...</span>
+            </div>
+            <div v-else-if="!loaderHasMore" class="custom-scroll-loader no-more">
+              <span class="no-more-text">🎉 已经到底啦，没有更多内容了</span>
+            </div>
+            <div v-else-if="error" class="custom-scroll-loader error">
+              <span class="error-text">❌ {{ error }}</span>
+              <button
+                class="retry-btn"
+                @click="loadDataSource"
+              >
+                重试
+              </button>
+            </div>
+          </template>
         </Waterfall>
       </div>
     </div>
@@ -336,5 +400,84 @@ img:not([src]) {
 
 img[src] {
   opacity: 1;
+}
+
+/* 自定义滚动加载提示样式 */
+.custom-scroll-loader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  margin: 1rem 0;
+  border-radius: 1rem;
+  background: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.custom-scroll-loader.loading {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.custom-scroll-loader.no-more {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.custom-scroll-loader.error {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  color: #dc2626;
+}
+
+.custom-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loading-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.no-more-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.error-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.retry-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

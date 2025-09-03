@@ -1,29 +1,42 @@
 import type {
   LifecycleHook,
+  ScrollLoadCallback,
   VueRef,
   VueVersion,
   Watch,
 } from './vue-lib-adapter'
+import { ref } from 'vue'
 import { debounce } from './debounce'
 
 export type NonEmptyArray<T> = [T, ...T[]]
 
 export type Column = number[]
 
-export interface Vue2ComponentEmits {
-  (event: 'redraw'): void
-  (event: 'redraw-skip'): void
+export const WF_EVENTS_REDRAW = 'redraw'
+export const WF_EVENTS_REDRAW_SKIP = 'redrawSkip'
+export const WF_EVENTS_SCROLL_LOAD_START = 'scrollLoadStart'
+export const WF_EVENTS_SCROLL_LOAD_END = 'scrollLoadEnd'
+export const WIN_EVENTS_SCROLL = 'scroll'
+export const WF_EVENTS_SCROLL_LOAD = 'scrollLoad'
+
+export type WF_EVENT_TYPE_REDRAW = typeof WF_EVENTS_REDRAW
+export type WF_EVENT_TYPE_REDRAW_SKIP = typeof WF_EVENTS_REDRAW_SKIP
+export type WF_EVENT_TYPE_SCROLL_LOAD_START = typeof WF_EVENTS_SCROLL_LOAD_START
+export type WF_EVENT_TYPE_SCROLL_LOAD_END = typeof WF_EVENTS_SCROLL_LOAD_END
+export type WF_EVENT_TYPE_SCROLL_LOAD = typeof WF_EVENTS_SCROLL_LOAD
+
+export interface WaterfallEmits {
+  (event: WF_EVENT_TYPE_REDRAW): void
+  (event: WF_EVENT_TYPE_REDRAW_SKIP): void
+  (event: WF_EVENT_TYPE_SCROLL_LOAD_START): void
+  (event: WF_EVENT_TYPE_SCROLL_LOAD_END, error?: string): void
+  (event: WF_EVENT_TYPE_SCROLL_LOAD): void
 }
 
-export interface Vue3ComponentEmits {
-  (event: 'redraw'): void
-  (event: 'redrawSkip'): void
-}
-
-export interface HookProps<T> {
+export interface WaterfallHookProps<T> {
   columns: VueRef<Column[]>
   columnWidth: VueRef<number | NonEmptyArray<number>>
-  emit: Vue2ComponentEmits | Vue3ComponentEmits
+  emit: WaterfallEmits
   gap: VueRef<number>
   items: VueRef<T[]>
   maxColumns: VueRef<number | undefined>
@@ -34,12 +47,17 @@ export interface HookProps<T> {
   rtl: VueRef<boolean>
   scrollContainer: VueRef<HTMLElement | null>
   ssrColumns: VueRef<number>
-  vue: VueVersion
-  wall: VueRef<HTMLDivElement>
+  vue?: VueVersion
+  dom: VueRef<HTMLDivElement>
   watch: Watch
+  // 新增：滚动加载相关属性
+  scrollLoadThreshold?: VueRef<number>
+  scrollLoadDisabled?: VueRef<boolean>
+  scrollLoadDebounce?: VueRef<number>
+  onScrollLoad?: ScrollLoadCallback
 }
 
-export function useMasonryWall<T>({
+export function useWaterfall<T>({
   columns,
   columnWidth,
   emit,
@@ -53,10 +71,14 @@ export function useMasonryWall<T>({
   rtl,
   scrollContainer,
   ssrColumns,
-  vue,
-  wall,
+  vue = 3,
+  dom,
   watch,
-}: HookProps<T>) {
+  scrollLoadThreshold,
+  scrollLoadDisabled,
+  scrollLoadDebounce,
+  onScrollLoad,
+}: WaterfallHookProps<T>) {
   function countIteratively(
     containerWidth: number,
     gap: number,
@@ -83,8 +105,12 @@ export function useMasonryWall<T>({
   }
 
   function columnCount(): number {
+    if (!dom.value) {
+      return 1
+    }
+
     const count = countIteratively(
-      wall.value.getBoundingClientRect().width,
+      dom.value.getBoundingClientRect().width,
       gap.value,
       0,
       // Needs to be offset my negative gap to prevent gap counts being off by one
@@ -130,7 +156,12 @@ export function useMasonryWall<T>({
       // e.g., in an onMounted hook during initial render
       return
     }
-    const columnDivs = [...wall.value.children] as HTMLDivElement[]
+
+    if (!dom.value) {
+      return
+    }
+
+    const columnDivs = [...dom.value.children] as HTMLDivElement[]
     if (rtl.value) {
       columnDivs.reverse()
     }
@@ -146,12 +177,11 @@ export function useMasonryWall<T>({
   async function redraw(force = false) {
     const newColumnCount = columnCount()
     if (columns.value.length === newColumnCount && !force) {
-      if (vue === 2) {
-        ;(emit as Vue2ComponentEmits)('redraw-skip')
+      if (vue < 2) {
+        // We don't support Vue 2 anymore
+        return
       }
-      else {
-        ;(emit as Vue3ComponentEmits)('redrawSkip')
-      }
+      emit(WF_EVENTS_REDRAW_SKIP)
       return
     }
     columns.value = createColumns(newColumnCount)
@@ -164,8 +194,68 @@ export function useMasonryWall<T>({
     else {
       window.scrollTo({ top: scrollY })
     }
-    emit('redraw')
+    emit(WF_EVENTS_REDRAW)
   }
+
+  // 滚动加载相关状态
+  const isLoading = ref(false)
+
+  // 滚动加载检测函数
+  function checkScrollLoad() {
+    if (!onScrollLoad || isLoading.value || scrollLoadDisabled?.value) {
+      return
+    }
+
+    const container = scrollContainer?.value || window
+    const threshold = scrollLoadThreshold?.value || 100
+
+    if (container === window) {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const windowHeight = window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+
+      if (scrollTop + windowHeight >= documentHeight - threshold) {
+        triggerScrollLoad()
+      }
+    }
+    else if (container instanceof HTMLElement) {
+      const scrollTop = container.scrollTop
+      const containerHeight = container.clientHeight
+      const scrollHeight = container.scrollHeight
+
+      if (scrollTop + containerHeight >= scrollHeight - threshold) {
+        triggerScrollLoad()
+      }
+    }
+  }
+
+  // 触发滚动加载
+  async function triggerScrollLoad() {
+    if (!onScrollLoad || isLoading.value || scrollLoadDisabled?.value) {
+      return
+    }
+
+    isLoading.value = true
+    emit(WF_EVENTS_SCROLL_LOAD_START)
+
+    try {
+      await onScrollLoad()
+      emit(WF_EVENTS_SCROLL_LOAD_END)
+    }
+    catch (error) {
+      console.error('[vue-waterfall-core] Scroll load error:', error)
+      emit(WF_EVENTS_SCROLL_LOAD_END, error as string)
+    }
+    finally {
+      isLoading.value = false
+    }
+  }
+
+  // 防抖的滚动检测
+  const debouncedCheckScrollLoad = debounce(
+    checkScrollLoad,
+    scrollLoadDebounce?.value || 200,
+  )
 
   const resizeObserver
     = typeof ResizeObserver === 'undefined'
@@ -173,16 +263,42 @@ export function useMasonryWall<T>({
       : new ResizeObserver(debounce(() => redraw()))
 
   onMounted(() => {
-    redraw()
-    resizeObserver?.observe(wall.value)
+    if (dom.value) {
+      redraw()
+      resizeObserver?.observe(dom.value)
+    }
+
+    // 设置滚动加载检测
+    if (onScrollLoad) {
+      const container = scrollContainer?.value || window
+      if (container === window) {
+        window.addEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad, { passive: true })
+      }
+      else {
+        container.addEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad, { passive: true })
+      }
+    }
   })
 
-  onBeforeUnmount(() => resizeObserver?.unobserve(wall.value))
+  onBeforeUnmount(() => {
+    resizeObserver?.unobserve(dom.value)
+
+    // 清理滚动加载检测
+    if (onScrollLoad) {
+      const container = scrollContainer?.value || window
+      if (container === window) {
+        window.removeEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad)
+      }
+      else {
+        container.removeEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad)
+      }
+    }
+  })
 
   watch([items, rtl], () => redraw(true))
   watch([columnWidth, gap, minColumns, maxColumns], () => redraw())
 
-  return { getColumnWidthTarget }
+  return { getColumnWidthTarget, isLoading }
 }
 
 function createColumns(count: number): Column[] {
