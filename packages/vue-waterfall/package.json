@@ -43,7 +43,9 @@
     "dev": "vite build --watch",
     "test": "vitest run",
     "type-check": "vue-tsc --build",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "peerDependencies": {
     "vue": "catalog:frontend"

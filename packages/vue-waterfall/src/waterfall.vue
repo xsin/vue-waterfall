@@ -1,7 +1,14 @@
 <script setup lang="ts" generic="T">
-import type { Column, NonEmptyArray } from '@xsin/vue-waterfall-core'
+import type {
+  Column,
+  NonEmptyArray,
+  WaterfallEmits,
+} from '@xsin/vue-waterfall-core'
 import type { Ref, VNode } from 'vue'
-import { useMasonryWall } from '@xsin/vue-waterfall-core'
+import {
+  useWaterfall,
+  WF_EVENTS_SCROLL_LOAD,
+} from '@xsin/vue-waterfall-core'
 import { nextTick, onBeforeUnmount, onMounted, ref, toRefs, watch } from 'vue'
 
 import { WF_CLASS_COLUMN, WF_CLASS_ITEM, WF_CLASS_ROOT } from '~/consts'
@@ -24,6 +31,10 @@ const props = withDefaults(
     minColumns?: number | undefined
     maxColumns?: number | undefined
     keyMapper?: KeyMapper<T> | undefined
+    // 新增：滚动加载相关配置
+    scrollLoadThreshold?: number | undefined
+    scrollLoadDisabled?: boolean | undefined
+    scrollLoadDebounce?: number | undefined
   }>(),
   {
     columnWidth: 400,
@@ -32,13 +43,13 @@ const props = withDefaults(
     rtl: false,
     scrollContainer: null,
     ssrColumns: 0,
+    scrollLoadThreshold: 100,
+    scrollLoadDisabled: false,
+    scrollLoadDebounce: 200,
   },
 )
 
-const emit = defineEmits<{
-  (event: 'redraw'): void
-  (event: 'redrawSkip'): void
-}>()
+const emit = defineEmits<WaterfallEmits>()
 
 defineSlots<{
   default?: (props: {
@@ -48,27 +59,57 @@ defineSlots<{
     row: number
     index: number
   }) => VNode | VNode[] | Element | Element[]
+  scrollLoader?: (props: {
+    isLoading: boolean
+    hasMore: boolean
+    error?: string | undefined
+  }) => VNode | VNode[] | Element | Element[]
 }>()
 
 const columns = ref<Column[]>([])
-const wall = ref<HTMLDivElement>() as Ref<HTMLDivElement>
+const dom = ref<HTMLDivElement>() as Ref<HTMLDivElement>
 
-const { getColumnWidthTarget } = useMasonryWall<T>({
+// 滚动加载状态
+const hasMore = ref(true)
+const error = ref<string>()
+
+// 滚动加载回调函数
+function handleScrollLoad() {
+  if (props.scrollLoadDisabled) {
+    return
+  }
+
+  emit(WF_EVENTS_SCROLL_LOAD)
+}
+
+const { getColumnWidthTarget, isLoading } = useWaterfall<T>({
   columns,
   emit,
   nextTick,
   onBeforeUnmount,
   onMounted,
   vue: 3,
-  wall,
+  dom,
   watch,
+  onScrollLoad: handleScrollLoad,
   ...toRefs(props),
+})
+
+// 暴露方法给父组件
+defineExpose({
+  setHasMore: (value: boolean) => {
+    hasMore.value = value
+  },
+  setError: (value: string) => {
+    error.value = value
+  },
+  triggerScrollLoad: handleScrollLoad,
 })
 </script>
 
 <template>
   <div
-    ref="wall"
+    ref="dom"
     :class="[WF_CLASS_ROOT]"
     :style="{ display: 'flex', gap: `${gap}px` }"
   >
@@ -110,5 +151,25 @@ const { getColumnWidthTarget } = useMasonryWall<T>({
         </slot>
       </div>
     </div>
+
+    <!-- 滚动加载提示插槽 -->
+    <slot
+      name="scrollLoader"
+      :is-loading="isLoading"
+      :has-more="hasMore"
+      :error="error || undefined"
+    >
+      <!-- 默认的加载提示 -->
+      <div v-if="isLoading" class="waterfall-scroll-loader loading">
+        <div class="waterfall-scroll-loader-spinner" />
+        <span>加载中...</span>
+      </div>
+      <div v-else-if="!hasMore" class="waterfall-scroll-loader no-more">
+        <span>没有更多数据了</span>
+      </div>
+      <div v-else-if="error" class="waterfall-scroll-loader error">
+        <span>{{ error }}</span>
+      </div>
+    </slot>
   </div>
 </template>

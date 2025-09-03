@@ -11,7 +11,7 @@ import {
 import { defineComponent } from 'vue'
 
 import { WF_CLASS_COLUMN, WF_CLASS_ITEM, WF_CLASS_ROOT } from '~/consts'
-import Waterfall from '~/index'
+import Waterfall, { WaterfallPlugin } from '~/index'
 
 let observeMock = vi.fn()
 let unobserveMock = vi.fn()
@@ -50,7 +50,7 @@ describe('waterfall', () => {
   it('can be installed', async () => {
     const wrapper = mount(TestComponent, {
       global: {
-        plugins: [Waterfall],
+        plugins: [WaterfallPlugin],
       },
     })
     await flushPromises()

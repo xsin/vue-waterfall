@@ -1,22 +1,15 @@
 import type { App, Plugin } from 'vue'
 
 import { WF_COMPONENT_NAME } from '~/consts'
-import component from '~/waterfall.vue'
+import Waterfall from '~/waterfall.vue'
 
-export type WaterfallComponent = typeof component
+export type WaterfallComponent = typeof Waterfall
 
-type WaterfallPlugin = WaterfallComponent & Plugin
-
-const Waterfall: WaterfallPlugin
-  /* #__PURE__ */ = ((): WaterfallPlugin => {
-    const installable = component as unknown as WaterfallPlugin
-
-    installable.install = (app: App) => {
-      app.component(WF_COMPONENT_NAME, installable)
-    }
-
-    return installable
-  })()
+export const WaterfallPlugin: Plugin = {
+  install: (app: App) => {
+    app.component(WF_COMPONENT_NAME, Waterfall)
+  },
+}
 
 declare module 'vue' {
   export interface GlobalComponents {
