@@ -13,7 +13,6 @@ permissions: write-all
 jobs:
   test:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -105,6 +104,13 @@ jobs:
         run: pnpm build:packages
 
       - name: Publish to pkg.pr.new
-        run: pnpm dlx pkg-pr-new publish
+        run: |
+          if [ "${{ github.event.head_commit.message }}" =~ "waterfall" ]; then
+            pnpm --filter @xsin/vue-waterfall dlx pkg-pr-new publish
+          elif [ "${{ github.event.head_commit.message }}" =~ "waterfall-core" ]; then
+            pnpm --filter @xsin/vue-waterfall-core dlx pkg-pr-new publish
+          elif [ "${{ github.event.head_commit.message }}" =~ "vite-plugin-lib" ]; then
+            pnpm --filter @xsin/vite-plugin-lib dlx pkg-pr-new publish
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
