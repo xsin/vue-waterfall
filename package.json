@@ -18,8 +18,8 @@
     "pkg:dev": "pnpm -r --filter=./packages/* --parallel run dev",
     "pkg:test": "pnpm -r --filter=./packages/* --parallel run test",
     "type-check": "pnpm --filter @xsin/vue-waterfall type-check",
-    "release": "bump -r",
-    "release:waterfall": "pnpm --filter @xsin/vue-waterfall release"
+    "up": "bump -r",
+    "release": "pnpm -r --parallel release"
   },
   "peerDependencies": {
     "vue": "catalog:frontend"

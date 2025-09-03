@@ -40,7 +40,8 @@
     "build": "unbuild",
     "dev": "unbuild --watch",
     "type-check": "vue-tsc --build",
-    "lint": "eslint"
+    "lint": "eslint",
+    "release": "semantic-release"
   },
   "peerDependencies": {
     "typescript": "*",

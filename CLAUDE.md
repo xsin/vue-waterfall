@@ -4,38 +4,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Vue 3 waterfall layout component library built with TypeScript. The project uses a monorepo structure with pnpm workspaces, containing:
-
-- **@xsin/vue-waterfall**: Core waterfall component package (`packages/waterfall/`)
-- **@xsin/vue-waterfall-demo**: Demo application (`apps/demo/`)
+Vue 3 waterfall layout component library with TypeScript support, featuring a monorepo structure with pnpm workspaces. The architecture separates core logic from Vue-specific implementations for framework portability.
 
 ## Architecture
 
 ### Monorepo Structure
 ```
 ├── packages/
-│   └── waterfall/           # Core component library
-│       ├── src/
-│       │   ├── Waterfall/   # Main component
-│       │   │   ├── Waterfall.vue
-│       │   │   ├── types.ts
-│       │   │   ├── constants.ts
-│       │   │   └── hooks.ts
-│       │   └── index.ts     # Package entry point
+│   ├── vue-waterfall/          # Vue 3 component wrapper
+│   ├── vue-waterfall-core/     # Framework-agnostic core logic
+│   └── tsconfig/               # Shared TypeScript configs
 ├── apps/
-│   └── demo/               # Demo application using the component
-└── pnpm-workspace.yaml     # Workspace configuration
+│   └── demo/                   # Demo application
+└── pnpm-workspace.yaml         # Workspace configuration
 ```
 
-### Component Architecture
-- **Waterfall**: Main component with TypeScript generics support
-- **Props**: `col`, `data`, `gutterWidth`, `isTransition`, `lazyDistance`, `loadDistance`, `interactive`
-- **Emits**: `scroll`, `loadMore`, `finish`
-- **Methods**: `resize()`, `mix()`
+### Core Architecture
+- **Layered Design**: Vue wrapper → Core algorithm → Framework adapter
+- **TypeScript Generics**: Full type safety with `<T>` support
+- **Responsive**: Dynamic column calculation based on container width
+- **SSR Compatible**: Server-side rendering support
+- **Scroll Loading**: Built-in infinite scroll with debouncing
 
 ## Development Commands
 
-### Core Commands
+### Package Management
 ```bash
 # Install dependencies
 pnpm install
@@ -45,13 +38,10 @@ pnpm dev                    # Run demo app
 pnpm build                  # Build waterfall package
 pnpm build:demo            # Build demo app
 
-# Code Quality
+# Quality
 pnpm lint                  # Lint all packages
 pnpm lint:fix             # Auto-fix lint issues
 pnpm type-check           # TypeScript check
-
-# Release
-pnpm release              # Semantic release for waterfall package
 ```
 
 ### Package-Specific Commands
@@ -66,49 +56,73 @@ pnpm --filter @xsin/vue-waterfall-demo dev
 pnpm --filter @xsin/vue-waterfall-demo build
 ```
 
-## Build System
+### Build System
+- **Vite**: Library build with ES/UMD outputs
+- **TypeScript**: vue-tsc for type checking
+- **pnpm catalogs**: Shared dependency management
+- **Semantic Release**: Automated versioning
 
-### Vite Configuration
-- **Waterfall Package**: Library build with UMD and ES formats
-- **Demo App**: Standard Vite app with TailwindCSS
-- **TypeScript**: Full type checking with vue-tsc
-- **CSS**: Less preprocessing, CSS injection
+## Component API
 
-### Build Outputs
-- `dist/waterfall.es.js` - ES module
-- `dist/waterfall.umd.js` - UMD module
-- `dist/waterfall.es.d.ts` - TypeScript declarations
-- `dist/waterfall.css` - Styles
+### Props (`Waterfall<T>`)
+- `items: T[]` - Array of items to display
+- `columnWidth: number | [number, ...number[]]` - Column width(s)
+- `gap: number` - Gap between items (default: 10)
+- `rtl: boolean` - Right-to-left support
+- `minColumns: number` - Minimum column count
+- `maxColumns: number` - Maximum column count
+- `ssrColumns: number` - SSR column count
+- `scrollLoadThreshold: number` - Scroll load trigger distance
+- `scrollLoadDisabled: boolean` - Disable scroll loading
+- `scrollLoadDebounce: number` - Debounce delay (default: 200ms)
 
-## Technology Stack
+### Events
+- `redraw` - Layout recalculated
+- `redrawSkip` - Layout recalculation skipped
+- `scrollLoadStart` - Scroll loading begins
+- `scrollLoadEnd` - Scroll loading completes
+- `scrollLoad` - Scroll threshold reached
 
-- **Vue 3**: Composition API with TypeScript
-- **Build**: Vite + vue-tsc
-- **Styling**: Less + TailwindCSS (demo)
-- **Linting**: ESLint with @antfu/eslint-config
-- **Package Manager**: pnpm with workspaces
+### Algorithm
+- **Greedy Placement**: Items placed in shortest column
+- **Dynamic Calculation**: Column count based on container width
+- **Resize Observer**: Debounced layout recalculation
+- **Scroll Detection**: Threshold-based infinite scroll
+
+## Key Technologies
+
+- **Vue 3**: Composition API with `<script setup>`
+- **TypeScript**: Full generic support with strict typing
+- **Vite**: Modern build tooling
+- **pnpm**: Monorepo workspace management
+- **ESLint**: @antfu/eslint-config for code quality
+
+## Quality Gates
+
+- **Type Checking**: vue-tsc with strict mode
+- **Linting**: ESLint with auto-fix
+- **No Tests**: Manual testing via demo app
 - **CI/CD**: GitHub Actions with semantic-release
 
-## Contributing Guidelines
+## Common Patterns
 
-### Commit Convention
-Use [Conventional Commits](https://www.conventionalcommits.org/):
-- `feat:` - New features
-- `fix:` - Bug fixes
-- `docs:` - Documentation
-- `style:` - Code formatting
-- `refactor:` - Code restructuring
-- `test:` - Tests
-- `chore:` - Build/tooling changes
+### Vue Integration
+```typescript
+// Component usage
+<Waterfall :items="photos" :column-width="300" @scroll-load="loadMore">
+  <template #item="{ item }">
+    <img :src="item.url" :alt="item.alt" />
+  </template>
+</Waterfall>
+```
 
-### Development Workflow
-1. Install dependencies: `pnpm install`
-2. Make changes in `packages/waterfall/src/`
-3. Test with demo: `pnpm dev`
-4. Build and check: `pnpm build && pnpm type-check`
-5. Lint: `pnpm lint:fix`
-
-### Testing
-- No unit tests currently configured
-- Manual testing via demo app
-- CI runs type-check and lint on PRs
+### Core Hook Usage
+```typescript
+const { getColumnWidthTarget, isLoading } = useWaterfall({
+  items: ref([]),
+  columns: ref([]),
+  columnWidth: ref(300),
+  gap: ref(10),
+  // ... other props
+})
+```
