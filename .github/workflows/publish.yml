@@ -71,7 +71,7 @@ jobs:
         run: pnpm install
 
       - name: Build packages
-        run: pnpm --filter @xsin/vue-waterfall build
+        run: pnpm build:packages
 
       - name: Run semantic-release
         id: semantic
@@ -102,7 +102,7 @@ jobs:
         run: pnpm install
 
       - name: Build packages
-        run: pnpm pkg:build
+        run: pnpm build:packages
 
       - name: Publish to pkg.pr.new
         run: pnpm dlx pkg-pr-new publish

@@ -2,8 +2,7 @@
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "@xsin/vue-waterfall": ["../../packages/vue-waterfall/src/index.ts"]
+      "@/*": ["./src/*"]
     },
     "types": [
       "vite/client"

@@ -353,7 +353,7 @@ onMounted(() => {
           </template>
 
           <!-- 自定义滚动加载提示插槽 -->
-          <template #scroll-loader="{ isLoading: loaderIsLoading, hasMore: loaderHasMore, error }">
+          <template #scrollLoader="{ isLoading: loaderIsLoading, hasMore: loaderHasMore, error }">
             <div v-if="loaderIsLoading" class="custom-scroll-loader loading">
               <div class="custom-spinner" />
               <span class="loading-text">正在加载更多内容...</span>

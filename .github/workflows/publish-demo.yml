@@ -41,7 +41,7 @@ jobs:
         run: pnpm install
 
       - name: Build packages
-        run: pnpm pkg:build
+        run: pnpm build:packages
 
       - name: Build demo
         run: pnpm build:demo
