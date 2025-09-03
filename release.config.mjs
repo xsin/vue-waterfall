@@ -13,16 +13,16 @@ export default {
       },
     ],
     [
-      '@semantic-release/git',
-      {
-        assets: ['docs/CHANGELOG.md'],
-      },
-    ],
-    [
       '@semantic-release/npm',
       {
         // pnpm 的 catalog 协议与 npm 不兼容，因此不使用 npm 插件发布
         npmPublish: false,
+      },
+    ],
+    [
+      '@semantic-release/git',
+      {
+        assets: ['docs/CHANGELOG.md'],
       },
     ],
     '@semantic-release/github',
