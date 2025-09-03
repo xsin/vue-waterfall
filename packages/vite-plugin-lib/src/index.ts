@@ -161,18 +161,27 @@ function buildConfig({
     name: 'vite-plugin-lib:build',
     enforce: 'pre',
     config: async (config) => {
+      const libConfig: any = {
+        entry: path.resolve(config.root ?? '.', entry),
+        formats,
+        fileName: (format: string) => formatToFileName(entry, format),
+      }
+
+      // 只有当 name 存在时才添加到配置中
+      if (name) {
+        libConfig.name = name
+      }
+
       return {
         ...config,
         build: {
           ...config.build,
           lib: {
             ...config.build?.lib,
-            entry: path.resolve(config.root ?? '.', entry),
-            formats,
-            name,
-            fileName: (format: string) => formatToFileName(entry, format),
+            ...libConfig,
           },
           rollupOptions: {
+            ...config.build?.rollupOptions,
             external: (source: string, _importer: string | undefined, _isResolved: boolean) => {
               const shouldBeExternalized = packagesToExternalize.some(rule => matchesRule(source, rule))
               const shouldBeBundled = bundleWithDefaults.include.some(rule => matchesRule(source, rule))
