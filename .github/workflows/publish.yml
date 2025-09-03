@@ -79,6 +79,11 @@ jobs:
           echo "new_release_version=$VERSION" >> $GITHUB_OUTPUT
           echo "Release version: $VERSION"
 
+      - name: Setup npm authentication
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+          echo "registry=https://registry.npmjs.org/" >> ~/.npmrc
+
       - name: Publish packages to npm
         run: |
           echo "Publishing new release version: ${{ steps.release.outputs.new_release_version }}"
@@ -86,7 +91,7 @@ jobs:
           pnpm --filter @xsin/vue-waterfall-core publish --no-git-checks --access public
           pnpm --filter @xsin/vite-plugin-lib publish --no-git-checks --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   pkg-pr-new:
     runs-on: ubuntu-latest
