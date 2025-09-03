@@ -9,6 +9,8 @@ catalogs:
     '@vitejs/plugin-vue': ^6.0.1
     '@vitejs/plugin-vue-jsx': ^5.1.1
     '@vue/tsconfig': ^0.8.1
+    '@xsin/tsconfig': workspace:*
+    '@xsin/vite-plugin-lib': workspace:*
     tsdown: ^0.14.2
     typescript: ^5.9.2
     unbuild: ^3.6.1
@@ -26,6 +28,7 @@ catalogs:
     simple-git-hooks: ^2.13.1
     tailwindcss: ^4.1.12
     taze: ^19.4.0
+    tsx: ^4.20.5
   eslint:
     '@antfu/eslint-config': ^5.2.1
     eslint: ^9.34.0
@@ -35,10 +38,7 @@ catalogs:
     '@xsin/vue-waterfall-core': workspace:*
     vue: ^3.5.21
   release:
-    '@semantic-release/changelog': ^6.0.3
-    '@semantic-release/git': ^10.0.1
     bumpp: ^10.2.3
-    semantic-release: ^24.2.7
   test:
     '@playwright/test': ^1.55.0
     '@testing-library/jest-dom': ^6.8.0',

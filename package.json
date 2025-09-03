@@ -21,22 +21,20 @@
     "pkg:test": "pnpm -r --filter=./packages/* --parallel run test",
     "type-check": "pnpm -r --filter=./packages/* --parallel type-check",
     "up": "bump -r",
-    "release": "pnpm -r --parallel release"
+    "release": "tsx scripts/release.ts"
   },
   "peerDependencies": {
     "vue": "catalog:frontend"
   },
   "devDependencies": {
     "@antfu/eslint-config": "catalog:eslint",
-    "@semantic-release/changelog": "catalog:release",
-    "@semantic-release/git": "catalog:release",
     "eslint": "catalog:eslint",
     "eslint-plugin-format": "catalog:eslint",
     "lint-staged": "catalog:dev",
     "npm-run-all2": "catalog:dev",
-    "semantic-release": "catalog:release",
     "simple-git-hooks": "catalog:dev",
-    "taze": "catalog:dev"
+    "taze": "catalog:dev",
+    "tsx": "catalog:dev"
   },
   "simple-git-hooks": {
     "pre-commit": "npx lint-staged"

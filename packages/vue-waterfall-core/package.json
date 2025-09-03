@@ -32,7 +32,6 @@
     "build": "vite build",
     "test": "vitest",
     "type-check": "vue-tsc --build",
-    "release": "npx semantic-release",
     "dev": "vite build --watch"
   },
   "devDependencies": {
