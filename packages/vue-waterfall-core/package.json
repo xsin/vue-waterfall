@@ -34,6 +34,9 @@
     "type-check": "vue-tsc --build",
     "dev": "vite build --watch"
   },
+  "peerDependencies": {
+    "vue": "catalog:frontend"
+  },
   "devDependencies": {
     "@types/resize-observer-browser": "catalog:types",
     "@xsin/tsconfig": "workspace:*",
