@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.2
+
+### 🐛 Fixes
+
+- integrate lock file checks into release process and improve error handling (db1f478)
+- update pnpm-lock.yaml (ad31206)
+
+
+# Changelog
+
 ## 0.1.1
 
 ### 🐛 Fixes

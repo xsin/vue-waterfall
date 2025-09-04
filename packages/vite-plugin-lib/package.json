@@ -1,7 +1,7 @@
 {
   "name": "@xsin/vite-plugin-lib",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Vite plugin for build configuration, automatic aliases, and type declarations.",
   "author": {
     "name": "XSIN STUDIO",
