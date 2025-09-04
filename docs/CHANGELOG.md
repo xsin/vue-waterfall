@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.1
+
+### 🐛 Fixes
+
+- 将vue添加至peerDependencies (30960ad)
+- Update import statements from MasonryWall to Waterfall and adjust environment requirements in README files (39b9bf9)
+- Enhance publish workflow to support manual triggers and version extraction from package.json (367ef5f)
+- Add npm authentication setup in publish workflow for secure package publishing (9a22750)
+
+
+# Changelog
+
 ## 0.1.0
 
 ### ✨ Features
