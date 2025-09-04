@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+
+### 🐛 Fixes
+
+- simplify event listener management in useWaterfall (9c0c022)
+
+
+# Changelog
+
 ## 0.1.2
 
 ### 🐛 Fixes
