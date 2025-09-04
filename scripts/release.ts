@@ -5,6 +5,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { checkLock } from './check-lock'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = join(__filename, '..')
@@ -245,6 +246,9 @@ function createGitTag(version: string): void {
 async function main(): Promise<void> {
   try {
     console.log('🚀 开始发布流程...\n')
+
+    // 检查锁文件
+    checkLock()
 
     // 检查是否有未提交的更改
     const hasUncommittedChanges = execSync('git status --porcelain', { encoding: 'utf-8' }).trim().length > 0
