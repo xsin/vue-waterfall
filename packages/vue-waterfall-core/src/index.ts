@@ -271,27 +271,19 @@ export function useWaterfall<T>({
     // 设置滚动加载检测
     if (onScrollLoad) {
       const container = scrollContainer?.value || window
-      if (container === window) {
-        window.addEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad, { passive: true })
-      }
-      else {
-        container.addEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad, { passive: true })
-      }
+      container?.addEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad, { passive: true })
     }
   })
 
   onBeforeUnmount(() => {
-    resizeObserver?.unobserve(dom.value)
+    if (dom.value) {
+      resizeObserver?.unobserve(dom.value)
+    }
 
     // 清理滚动加载检测
     if (onScrollLoad) {
       const container = scrollContainer?.value || window
-      if (container === window) {
-        window.removeEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad)
-      }
-      else {
-        container.removeEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad)
-      }
+      container?.removeEventListener(WIN_EVENTS_SCROLL, debouncedCheckScrollLoad)
     }
   })
 
